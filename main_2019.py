@@ -43,8 +43,7 @@ class ThreeLayerNN:
         error_output = ideal_data - output
 
         # 重みの更新
-        self.weight_input_hide += self.lr * np.dot(error_output * self.fxdaf(output) * self.weight_hide_output,
-                                                   self.fxdaf(input_hide) * vertical_input.T)
+        self.weight_input_hide += self.lr * np.dot(error_output * self.fxdaf(output) * self.weight_hide_output, self.fxdaf(input_hide) * vertical_input.T)
         self.weight_hide_output += self.lr * np.dot((error_output * self.fxdaf(output)), hide_output.T)
 
         return output[0][0]

@@ -50,11 +50,11 @@ class ThreeLayerNN:
 
 # NNの入出力関数
 def NNfunc(x):
-    return (1 - np.exp(-x)) / (1 + np.exp(-x))
+    return np.exp(x)
 
 # NNの入力関数の微分
 def derivative_NNfunc(x):
-    return 2 * np.exp(-x) / ((1 + np.exp(-x)) * (1 + np.exp(-x)))
+    return np.exp(x)
 
 # システムの出力
 @lru_cache(maxsize=1000)
@@ -62,14 +62,9 @@ def y(k):
     if k <= 0:
         return 0
     else:
-        Y = 1.38 * y(k-1) - 0.47 * y(k-2) + 0.1 * y(k-1) * y(k-1) - 0.05 * y(k-2) * y(k-3)
-        U = 0.25 * u(k-1) + 0.2 * u(k-2)
-        V = v() - 1.38 * v() + 0.47 * v()
-        return Y + U + V
-
-# システムに加わるノイズ
-def v():
-    return random.gauss(0, 1 / 100)
+        Y = y(k-1) - 0.35 * y(k-2)
+        U = u(k-1) + 0.75 * u(k-2)
+        return Y + U
 
 # システム出力の目標値
 def r(k):
@@ -81,12 +76,12 @@ def gr(k):
 # システムの入力
 @lru_cache(maxsize=1000)
 def u(k):
-    return 0 if k <= 0 else u(k-1) + 0.32 * (r(k) - y(k)) - 0.3 * (r(k-1) - y(k-1))
+    return 0 if k <= 0 else u(k-1) + 0.65 * (r(k) - y(k)) - 0.6 * (r(k-1) - y(k-1)) + 0.05 * (r(k-2) - y(k-2))
 
 # 評価関数の計算
 def evaluation(sys_list, nn_list):
     tmp_list = []
-    for k in range(0, 5001):
+    for k in range(0, 1001):
         tmp_list.append(0.5 * (sys_list[k] - nn_list[k]) * (sys_list[k] - nn_list[k]))
 
     return tmp_list
@@ -94,7 +89,7 @@ def evaluation(sys_list, nn_list):
 # 評価関数のグラフの描画
 def draw_eval_graph(title, j_list, hide_node, lr):
     height = np.array(j_list)
-    left = [n for n in range(0, 5001)]
+    left = [n for n in range(0, 1001)]
     plt.bar(left, height)
     plt.title(title)
     plt.xlabel("sampling number\nHidden layer : {0}\nLearning rate : {1}".format(hide_node, lr))
@@ -122,11 +117,11 @@ if __name__ == '__main__':
     u_list = []
 
     # 時間区間ごとのシステムの出力
-    for k in range(0, 5001):
+    for k in range(0, 1001):
         y_list.append(y(k))
 
     # 時間区間ごとのシステムの入力
-    for k in range(0, 5001):
+    for k in range(0, 1001):
         u_list.append(u(k))
 
     # 入力層，隠れ層，出力層の層数
@@ -144,7 +139,7 @@ if __name__ == '__main__':
     forward_nn = ThreeLayerNN(input_node, hide_node, output_node, lr)
 
     # 順方向のNNの出力
-    for k in range(0, 5001):
+    for k in range(0, 1001):
         if k > 1:
             input_x = [y_list[k - 1], y_list[k - 2], u_list[k - 1], u_list[k - 2]]
             forward_ynn_list.append(forward_nn.Forward_Reverse_direction(input_x, y_list[k]))
@@ -159,7 +154,7 @@ if __name__ == '__main__':
     reverse_nn = ThreeLayerNN(input_node, hide_node, output_node, lr)
 
     # 逆方向のNNの出力
-    for k in range(0, 5001):
+    for k in range(0, 1001):
         if k > 1:
             input_x = [y_list[k], y_list[k - 1], y_list[k - 2], u_list[k - 2]]
             reverse_ynn_list.append(reverse_nn.Forward_Reverse_direction(input_x, u_list[k]))
@@ -184,9 +179,11 @@ if __name__ == '__main__':
     end_k = start_k + 100
 
     # 順方向の同定システムのグラフ描画
-    draw_identification_graph("Forward Identification System", y_list, forward_ynn_list, sys_label_name="y", nn_label_name="ynn", start_k=start_k, end_k=end_k, hide_node=hide_node, lr=lr)
-    draw_identification_graph("Forward Identification System", y_list, forward_ynn_list, sys_label_name="y", nn_label_name="ynn", start_k=4900, end_k=5000, hide_node=hide_node, lr=lr)
+    draw_identification_graph("Forward Identification System", y_list, forward_ynn_list, sys_label_name="y", nn_label_name="ynn", start_k=start_k, end_k=100, hide_node=hide_node, lr=lr)
+
+    draw_identification_graph("Forward Identification System", y_list, forward_ynn_list, sys_label_name="y", nn_label_name="ynn", start_k=900, end_k=end_k, hide_node=hide_node, lr=lr)
 
     # 逆方向の同定システムのグラフ描画
-    draw_identification_graph("Reverse Identification System", u_list, reverse_ynn_list, sys_label_name="u", nn_label_name="ynn", start_k=start_k, end_k=end_k, hide_node=hide_node, lr=lr)
-    draw_identification_graph("Reverse Identification System", u_list, reverse_ynn_list,sys_label_name="u", nn_label_name="ynn", start_k=4900, end_k=5000, hide_node=hide_node, lr=lr)
+    draw_identification_graph("Reverse Identification System", u_list, reverse_ynn_list, sys_label_name="u", nn_label_name="ynn", start_k=start_k, end_k=100, hide_node=hide_node, lr=lr)
+
+    draw_identification_graph("Reverse Identification System", u_list, reverse_ynn_list,sys_label_name="u", nn_label_name="ynn", start_k=900, end_k=end_k, hide_node=hide_node, lr=lr)
