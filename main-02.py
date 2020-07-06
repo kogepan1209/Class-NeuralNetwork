@@ -62,9 +62,11 @@ def y(k):
     if k <= 0:
         return 0
     else:
-        Y = y(k-1) - 0.35 * y(k-2)
-        U = u(k-1) + 0.75 * u(k-2)
-        return Y + U
+        #Y = y(k-1) - 0.35 * y(k-2)
+        #U = u(k-1) + 0.75 * u(k-2)
+        #return Y + U
+        Y = ( ( y(k-1) * y(k-2) * ( y(k-1)+0.5 ) + 0.5 * u(k-1) ) / (1 + y(k-1)*y(k-1) + y(k-2)*y(k-2) ) + ( (0.2*y(k-2)*u(k-1) - 0.3*u(k-2)) / (1+y(k-1)*y(k-2)) ) )
+        return Y
 
 # システム出力の目標値
 def r(k):
@@ -126,7 +128,7 @@ if __name__ == '__main__':
 
     # 入力層，隠れ層，出力層の層数
     input_node = 4
-    hide_node = 15
+    hide_node = 10
     output_node = 1
 
     # 順方向の学習係数
@@ -166,24 +168,24 @@ if __name__ == '__main__':
     forward_j_list = evaluation(y_list, forward_ynn_list)
 
     # 順方向の評価関数のグラフ描画
-    draw_eval_graph("Sys.1 Forward Evaluation Function", forward_j_list, hide_node=hide_node, lr=lr)
+    draw_eval_graph("Sys.2 Forward Evaluation Function", forward_j_list, hide_node=hide_node, lr=lr)
 
     # 逆方向の評価関数のリスト
     reverse_j_list = evaluation(u_list, reverse_ynn_list)
 
     # 逆方向の評価関数のグラフ描画
-    draw_eval_graph("Sys.1 Reverse Evaluation Function", reverse_j_list, hide_node=hide_node, lr=lr)
+    draw_eval_graph("Sys.2 Reverse Evaluation Function", reverse_j_list, hide_node=hide_node, lr=lr)
 
     # グラフの横軸のはじめと終わり
     start_k = 0
     end_k = start_k + 100
 
     # 順方向の同定システムのグラフ描画
-    draw_identification_graph("Sys.1 Forward Identification System", y_list, forward_ynn_list, sys_label_name="y", nn_label_name="ynn", start_k=start_k, end_k=end_k, hide_node=hide_node, lr=lr)
+    draw_identification_graph("Sys.2 Forward Identification System", y_list, forward_ynn_list, sys_label_name="y", nn_label_name="ynn", start_k=start_k, end_k=end_k, hide_node=hide_node, lr=lr)
 
-    draw_identification_graph("Sys.1 Forward Identification System", y_list, forward_ynn_list, sys_label_name="y", nn_label_name="ynn", start_k=900, end_k=1000, hide_node=hide_node, lr=lr)
+    draw_identification_graph("Sys.2 Forward Identification System", y_list, forward_ynn_list, sys_label_name="y", nn_label_name="ynn", start_k=900, end_k=1000, hide_node=hide_node, lr=lr)
 
     # 逆方向の同定システムのグラフ描画
-    draw_identification_graph("Sys.1 Reverse Identification System", u_list, reverse_ynn_list, sys_label_name="u", nn_label_name="ynn", start_k=start_k, end_k=end_k, hide_node=hide_node, lr=lr)
+    draw_identification_graph("Sys.2 Reverse Identification System", u_list, reverse_ynn_list, sys_label_name="u", nn_label_name="ynn", start_k=start_k, end_k=end_k, hide_node=hide_node, lr=lr)
 
-    draw_identification_graph("Sys.1 Reverse Identification System", u_list, reverse_ynn_list,sys_label_name="u", nn_label_name="ynn", start_k=900, end_k=1000, hide_node=hide_node, lr=lr)
+    draw_identification_graph("Sys.2 Reverse Identification System", u_list, reverse_ynn_list,sys_label_name="u", nn_label_name="ynn", start_k=900, end_k=1000, hide_node=hide_node, lr=lr)
