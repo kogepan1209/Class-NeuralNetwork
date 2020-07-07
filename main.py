@@ -128,11 +128,11 @@ if __name__ == '__main__':
 
     # 入力層，隠れ層，出力層の層数
     input_node = 4
-    hide_node = 100
+    hide_node = 20
     output_node = 1
 
     # 順方向の学習係数
-    lr = 0.185
+    lr = 0.18
 
     # 順方向のNNの出力のリスト
     forward_ynn_list = []
